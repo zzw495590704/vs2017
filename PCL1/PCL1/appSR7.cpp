@@ -24,7 +24,7 @@ void generatePointCloud() {
 	//连接相机 
 	SR7IF_EthernetOpen(DEVICE_ID, &SREthernetConFig);
 	//开始批处理
-	SR7IF_StartMeasure(DEVICE_ID, 120000);
+	SR7IF_StartMeasure(DEVICE_ID, 150000);
 	//批处理总行数获取
 	int BatchPoint = SR7IF_ProfilePointSetCount(DEVICE_ID, DataObject); //获取总行数
 	//获取轮廓宽度
@@ -51,9 +51,10 @@ void generatePointCloud() {
 		end = std::chrono::steady_clock::now();
 		// 计算循环执行时间
 		std::chrono::duration<double> elapsed_seconds = end - start;
-		std::cout << "当前行：" << m_curBatchPoint << "  上次行：" << lastBatchPoint_CurNo << "  耗时：" << elapsed_seconds.count() << std::endl;
+		std::cout << "当前行：" << BatchPoint_CurNo << "  上次行：" << lastBatchPoint_CurNo << "  处理行：" << m_curBatchPoint << "  耗时：" << elapsed_seconds.count() << std::endl;
+		start = end;
 		// 循环遍历每一行
-		for (int i = lastBatchPoint_CurNo; i < m_curBatchPoint; ++i) {
+		for (int i = lastBatchPoint_CurNo; i < BatchPoint_CurNo; ++i) {
 			// 循环遍历每一列
 			for (int j = 0; j < m_DataWidth; ++j) {
 				// 访问 HeightData[i * m_DataWidth + j] 来获取数据
@@ -100,7 +101,7 @@ void generatePointCloud() {
 	// 计算循环执行时间
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	// 保存点云到PLY文件
-	pcl::io::savePLYFile("point_cloud.ply", *cloud);
+	pcl::io::savePLYFile("./data/point_cloud.ply", *cloud);
 	std::cout << "保存point_cloud.ply 耗时："<< elapsed_seconds.count() << std::endl;
 }
 
