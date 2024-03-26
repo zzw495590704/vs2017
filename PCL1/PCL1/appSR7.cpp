@@ -57,13 +57,13 @@ void generatePointCloud() {
 		// 循环遍历每一行
 		for (int i = lastBatchPoint_CurNo; i < BatchPoint_CurNo; ++i) {
 				// 循环遍历每一列
-				for (int j = 0; j < m_DataWidth; j+=4) {
+				for (int j = 0; j < m_DataWidth; ++j) {
 					// 访问 HeightData[i * m_DataWidth + j] 来获取数据
 					int data = HeightData[i * m_DataWidth + j];
 					if (data != -1000000000) {
 						pcl::PointXYZ point;
-						point.x = (double)i*0.01;
-						point.y = (double)j*0.02;
+						point.x = (double)j*0.02;
+						point.y = (double)i*0.01;
 						point.z = (double)data / 100000;
 						save->points.push_back(point);
 							
@@ -100,10 +100,10 @@ void generatePointCloud() {
 	std::cout << "开始保存PLY文件" << std::endl;
 	// 开始计时
 	start = std::chrono::steady_clock::now();
-	// 结束计时
-	end = std::chrono::steady_clock::now();
 	// 保存点云到PLY文件
 	pcl::io::savePLYFile("./data/point_cloud.ply", *save);
+	// 结束计时
+	end = std::chrono::steady_clock::now();
 	// 计算循环执行时间
 	std::chrono::duration<double> elapsed_seconds = end - start;
 	std::cout << "保存point_cloud.ply 耗时："<< elapsed_seconds.count() << std::endl;
