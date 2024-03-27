@@ -6,11 +6,16 @@
 #include <thread>
 #include <mutex>
 #include "SR7Link.h"
+
+#define MAX_X  1600
+#define TH_X1  1600/4
+
 std::mutex cloud_mutex;
 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 pcl::PointCloud<pcl::PointXYZ>::Ptr save(new pcl::PointCloud<pcl::PointXYZ>);
 bool new_cloud_available = false;
-
+static int s_lenghtX, s_widthY, s_heightZ;
+static double s_heightTotal = 0;
 void generatePointCloud() {
 	//相机IP地址
 	SR7IF_ETHERNET_CONFIG SREthernetConFig;
@@ -52,31 +57,36 @@ void generatePointCloud() {
 		end = std::chrono::steady_clock::now();
 		// 计算循环执行时间
 		std::chrono::duration<double> elapsed_seconds = end - start;
-		std::cout << "当前行：" << BatchPoint_CurNo << "  上次行：" << lastBatchPoint_CurNo << "  处理行：" << m_curBatchPoint << "  耗时：" << elapsed_seconds.count() << std::endl;
+		//std::cout << "当前行：" << BatchPoint_CurNo << "  上次行：" << lastBatchPoint_CurNo << "  处理行：" << m_curBatchPoint << "  耗时：" << elapsed_seconds.count() << std::endl;
 		start = end;
 		// 循环遍历每一行
 		for (int i = lastBatchPoint_CurNo; i < BatchPoint_CurNo; ++i) {
-				// 循环遍历每一列
-				for (int j = 0; j < m_DataWidth; ++j) {
-					// 访问 HeightData[i * m_DataWidth + j] 来获取数据
-					int data = HeightData[i * m_DataWidth + j];
-					if (data != -1000000000) {
-						pcl::PointXYZ point;
-						point.x = (double)j*0.02;
-						point.y = (double)i*0.01;
-						point.z = (double)data / 100000;
-						save->points.push_back(point);
-							
-						if (i % 16 == 0 && j % 16 == 0) {
-							// Lock the mutex before modifying the shared resource
-							std::lock_guard<std::mutex> lock(cloud_mutex);
-							cloud->points.push_back(point);
-						}
-						// 在这里进行处理，比如输出到控制台
-						//std::cout << "Data at (" << i << ", " << j << "): " << data << std::endl;
+			// 循环遍历每一列
+			for (int j = 0; j < m_DataWidth; ++j) {
+				// 访问 HeightData[i * m_DataWidth + j] 来获取数据
+				int data = HeightData[i * m_DataWidth + j];
+				if (data != -1000000000) {
+					pcl::PointXYZ point;
+					point.x = (double)j*0.02;
+					point.y = (double)i*0.01;
+					point.z = (double)data / 100000;
+					save->points.push_back(point);
+					//插入显示点云		
+					if (i % 16 == 0 && j % 16 == 0) {
+						// Lock the mutex before modifying the shared resource
+						std::lock_guard<std::mutex> lock(cloud_mutex);
+						cloud->points.push_back(point);
 					}
-
+					//体积计算相关
+					if (point.z > 0.2) {
+						s_heightTotal = s_heightTotal + point.z + 0.03;
+						s_lenghtX += 1;
+						s_heightZ += 1;
+					}
+					// 在这里进行处理，比如输出到控制台
+					//std::cout << "Data at (" << i << ", " << j << "): " << data << std::endl;
 				}
+			}
 		}
 		lastBatchPoint_CurNo = BatchPoint_CurNo;
 
@@ -88,7 +98,10 @@ void generatePointCloud() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Wait for 1 second
 
 	} while (lastBatchPoint_CurNo < BatchPoint);
-
+	std::cout << "total:" << save->size() << " lenghtX:" << s_lenghtX  << "  heightZ:" << s_heightZ << std::endl;
+	double volume = s_lenghtX * 0.02 * 0.01 * s_heightTotal / s_heightZ;
+	std::cout << "=====================" << std::endl;
+	std::cout << "体积:" << volume << std::endl;
 	//内存释放
 	delete[] HeightData;
 	//停止批处理
