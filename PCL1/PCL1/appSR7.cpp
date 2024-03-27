@@ -7,6 +7,8 @@
 #include <mutex>
 #include "SR7Link.h"
 
+#include "appSR7.h"
+
 #define MAX_X  1600
 #define TH_X1  1600/4
 
@@ -144,12 +146,13 @@ void displayPointCloud() {
 	}
 }
 
-int main() {
-	std::thread cloud_generator(generatePointCloud);
-	std::thread cloud_viewer(displayPointCloud);
+int appSR7() {
+	std::cout << "开始创建扫描线程" << std::endl;
+	//std::thread cloud_generator(generatePointCloud);
+	//std::thread cloud_viewer(displayPointCloud);
 
-	cloud_generator.join();
-	cloud_viewer.join();
+	//cloud_generator.join();
+	//cloud_viewer.join();
 
 	return 0;
 }
