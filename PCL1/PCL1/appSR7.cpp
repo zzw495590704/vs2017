@@ -31,6 +31,10 @@ void generatePointCloud() {
 	SR7IF_Data DataObject = NULL;
 	//连接相机 
 	SR7IF_EthernetOpen(DEVICE_ID, &SREthernetConFig);
+
+	int EnStartMearsure = 0x01;
+	//批处理是使能
+	SR7IF_SetSetting(0, 0x01, 0x10, 0, 0x03, 0,&EnStartMearsure, 1);
 	//开始批处理
 	SR7IF_StartMeasure(DEVICE_ID, 150000);
 	//批处理总行数获取
@@ -48,6 +52,9 @@ void generatePointCloud() {
 	std::chrono::time_point<std::chrono::steady_clock> start, end;
 	// 开始计时
 	start = std::chrono::steady_clock::now();
+
+
+
 	do {
 		//获取当前批次的批处理行数编号
 		int BatchPoint_CurNo = SR7IF_ProfilePointCount(DEVICE_ID, DataObject);
@@ -70,7 +77,7 @@ void generatePointCloud() {
 				if (data != -1000000000) {
 					pcl::PointXYZ point;
 					point.x = (double)j*0.02;
-					point.y = (double)i*0.01;
+					point.y = (double)i*0.02;
 					point.z = (double)data / 100000;
 					save->points.push_back(point);
 					//插入显示点云		
@@ -80,8 +87,8 @@ void generatePointCloud() {
 						cloud->points.push_back(point);
 					}
 					//体积计算相关
-					if (point.z > 0.2) {
-						s_heightTotal = s_heightTotal + point.z + 0.03;
+					if (point.z > 0.5) {
+						s_heightTotal = s_heightTotal + point.z;
 						s_lenghtX += 1;
 						s_heightZ += 1;
 					}
@@ -101,9 +108,11 @@ void generatePointCloud() {
 
 	} while (lastBatchPoint_CurNo < BatchPoint);
 	std::cout << "total:" << save->size() << " lenghtX:" << s_lenghtX  << "  heightZ:" << s_heightZ << std::endl;
-	double volume = s_lenghtX * 0.02 * 0.01 * s_heightTotal / s_heightZ;
+	double volume = s_lenghtX * 0.02 * 0.02 * s_heightTotal / s_heightZ;
 	std::cout << "=====================" << std::endl;
-	std::cout << "体积:" << volume << std::endl;
+	std::cout << "选取点云:" << s_heightZ << std::endl;
+	std::cout << "体积:" << volume << "mm^3" <<std::endl;
+	//std::cout << "密度:" << 820/volume << "g/cm^3" << std::endl;
 	//内存释放
 	delete[] HeightData;
 	//停止批处理
@@ -148,11 +157,11 @@ void displayPointCloud() {
 
 int appSR7() {
 	std::cout << "开始创建扫描线程" << std::endl;
-	//std::thread cloud_generator(generatePointCloud);
-	//std::thread cloud_viewer(displayPointCloud);
+	std::thread cloud_generator(generatePointCloud);
+	std::thread cloud_viewer(displayPointCloud);
 
-	//cloud_generator.join();
-	//cloud_viewer.join();
+	cloud_generator.join();
+	cloud_viewer.join();
 
 	return 0;
 }
