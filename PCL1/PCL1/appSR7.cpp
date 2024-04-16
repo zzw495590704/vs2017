@@ -43,6 +43,7 @@ void generatePointCloud() {
 	int m_DataWidth = SR7IF_ProfileDataWidth(DEVICE_ID, DataObject);
 	//获取x方向距离
 	double m_DataXPitch = SR7IF_ProfileData_XPitch(DEVICE_ID, DataObject);
+	double m_DataYPitch = 0.02;
 	// 输出参数
 	std::cout << "总行数:" << BatchPoint << "   宽度:" << m_DataWidth << "   x方向距离:" << m_DataXPitch << endl;
 	// 循环获取批处理数据
@@ -52,8 +53,6 @@ void generatePointCloud() {
 	std::chrono::time_point<std::chrono::steady_clock> start, end;
 	// 开始计时
 	start = std::chrono::steady_clock::now();
-
-
 
 	do {
 		//获取当前批次的批处理行数编号
@@ -76,8 +75,8 @@ void generatePointCloud() {
 				int data = HeightData[i * m_DataWidth + j];
 				if (data != -1000000000) {
 					pcl::PointXYZ point;
-					point.x = (double)j*0.02;
-					point.y = (double)i*0.02;
+					point.x = (double)j* m_DataXPitch;
+					point.y = (double)i* m_DataYPitch;
 					point.z = (double)data / 100000;
 					save->points.push_back(point);
 					//插入显示点云		
@@ -108,7 +107,7 @@ void generatePointCloud() {
 
 	} while (lastBatchPoint_CurNo < BatchPoint);
 	std::cout << "total:" << save->size() << " lenghtX:" << s_lenghtX  << "  heightZ:" << s_heightZ << std::endl;
-	double volume = s_lenghtX * 0.02 * 0.02 * s_heightTotal / s_heightZ;
+	double volume = s_lenghtX * m_DataXPitch * m_DataYPitch * s_heightTotal / s_heightZ;
 	std::cout << "=====================" << std::endl;
 	std::cout << "选取点云:" << s_heightZ << std::endl;
 	std::cout << "体积:" << volume << "mm^3" <<std::endl;
