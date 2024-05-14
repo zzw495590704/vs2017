@@ -44,7 +44,7 @@ void serialReceive(serial_port& serial) {
 		}
 		// 打印接收到的字符串
 		//std::cout << "Received: " << line << std::endl;
-		size_t commaPos = line.find(',');
+		size_t commaPos = line.find(':');
 		if (commaPos != std::string::npos) {
 			serialCommand = line.substr(0, commaPos);
 			std::string valueStr = line.substr(commaPos + 1);

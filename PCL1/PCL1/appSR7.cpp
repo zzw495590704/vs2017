@@ -45,7 +45,7 @@ void generatePointCloud() {
 	double m_DataXPitch = SR7IF_ProfileData_XPitch(DEVICE_ID, DataObject);
 	double m_DataYPitch = 0.02;
 	// 输出参数
-	std::cout << "总行数:" << BatchPoint << "   宽度:" << m_DataWidth << "   x方向距离:" << m_DataXPitch << endl;
+	std::cout << "总行数:" << BatchPoint << "   宽度:" << m_DataWidth << "   x方向距离:" << m_DataXPitch << "   y方向距离:" << m_DataYPitch << endl;
 	// 循环获取批处理数据
 	int lastBatchPoint_CurNo = 0; //上一次接收到的批处理数据行数编号
 	int * HeightData = new int[BatchPoint * m_DataWidth]; //高度数据缓存
@@ -80,13 +80,13 @@ void generatePointCloud() {
 					point.z = (double)data / 100000;
 					save->points.push_back(point);
 					//插入显示点云		
-					if (i % 16 == 0 && j % 16 == 0) {
+					if (i % 4 == 0 && j % 4 == 0) {
 						// Lock the mutex before modifying the shared resource
 						std::lock_guard<std::mutex> lock(cloud_mutex);
 						cloud->points.push_back(point);
 					}
 					//体积计算相关
-					if (point.z > 0.5) {
+					if (point.z > 0.2) {
 						s_heightTotal = s_heightTotal + point.z;
 						s_lenghtX += 1;
 						s_heightZ += 1;

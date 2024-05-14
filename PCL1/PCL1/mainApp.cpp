@@ -3,7 +3,7 @@
 #include <thread>
 #include "serialAPP.h"
 #include "appSR7.h"
-
+#include <cstdlib>
 std::string scanCommand = "SCAN";
 
 int main() {
@@ -21,9 +21,11 @@ int main() {
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}*/
 	appSR7();
-	// 等待用户输入来停止线程
+	// 等待用户输入来停止线程	
+	system("python test.py");
 	std::cout << "Press enter to stop the thread." << std::endl;
 	std::cin.get();
-	serialAppClose();
+	//serialAppClose();
+	
 	return 0;
 }
