@@ -7,22 +7,15 @@
 std::string scanCommand = "SCAN";
 
 int main() {
-	serialApp();
-	/*while (true)
-	{*/
-		double weight = serialAppGetWeight();
-		std::string command = serialAppGetCommand();
-
-		std::cout << "Command:" << command << "  Weight:" << weight << std::endl;
-		/*if (command == scanCommand) {
-			std::cout << "跳出循环" << std::endl;
-			break;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}*/
-	appSR7();
+	std::thread serialThread(serialApp);
+	std::thread SR7Thread(appSR7);
+	serialThread.join();
+	SR7Thread.join();
+	//serialApp();
+	//appSR7();
 	// 等待用户输入来停止线程	
-	system("python test.py");
+	std::cout << "run exe" << std::endl;
+	//system("C:/Users/codefab/.conda/envs/zzw/python test.py");
 	std::cout << "Press enter to stop the thread." << std::endl;
 	std::cin.get();
 	//serialAppClose();

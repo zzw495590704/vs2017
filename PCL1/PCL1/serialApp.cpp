@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 #include "serialAPP.h"
-
+#include "appSR7.h"
 using namespace boost::asio;
 bool g_bExitThread = true;
 
@@ -51,9 +51,10 @@ void serialReceive(serial_port& serial) {
 			// 转换为float类型
 			serialWeight = std::stof(valueStr);
 			// 打印结果
-			std::cout << "Command: " << serialCommand << ", Value: " << serialWeight << std::endl;
-			if(serialCommand=="SCAN")
-				serialAppClose();
+			//std::cout << "Command: " << serialCommand << ", Value: " << serialWeight << std::endl;
+			if (serialCommand == "SCAN") {
+				startScanSR7();
+			}
 		}
 	}
 }
@@ -61,7 +62,7 @@ void serialReceive(serial_port& serial) {
 int serialApp() {
 	// 设置串口端口号和波特率
 	io_service io;
-	serial_port serial(io, "COM12"); // 更改串口路径以匹配你的串口
+	serial_port serial(io, "COM7"); // 更改串口路径以匹配你的串口
 	serial.set_option(serial_port_base::baud_rate(115200)); // 更改波特率以匹配你的设置
 
 	// 创建一个新线程来接收串口数据
