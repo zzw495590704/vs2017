@@ -24,6 +24,6 @@ typedef enum {
     NO_PRINT,
 }log_level_t;
 
-#define USER_FUNCTION_CALLBACK
+//#define USER_FUNCTION_CALLBACK
 //#define LOOP_TEST
 //#define UPDATE_FW

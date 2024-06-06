@@ -378,6 +378,19 @@ void command_sel(int cmd_type)
         set_tpd_nuc_t_array((uint8_t*)new_nuc_table);
         printf("set_tpd_bt_array completed new_nuc_table[0]=%d\n", new_nuc_table[0]);
         break;
+	case 32:
+		uint16_t res[3];
+		
+		get_prop_auto_shutter_params(SHUTTER_PROP_SWITCH,&res[0]);
+		get_prop_auto_shutter_params(SHUTTER_PROP_MIN_INTERVAL, &res[1]);
+		get_prop_auto_shutter_params(SHUTTER_PROP_MAX_INTERVAL, &res[2]);
+
+		printf("auto shutter:[0]:%d, [1]:%d, [2]:%d\n", res[0], res[1], res[2]);
+		break;
+	case 33:
+		set_prop_auto_shutter_params(SHUTTER_PROP_SWITCH,0);
+		printf("auto shutter off\n");
+		break;
     default:
         break;
 

@@ -187,6 +187,7 @@ int main(void)
 
 //user function callback mode
 #ifdef USER_FUNCTION_CALLBACK
+#	    //off auto fix
         display_init(&stream_frame_info);
         rst = ir_camera_stream_on_with_callback(&stream_frame_info, usr_test_func);
 
