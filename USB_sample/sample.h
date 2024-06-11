@@ -14,6 +14,7 @@
 #include "camera.h"
 #include "display.h"
 #include "temperature.h"
+#include "serial.h"
 
 #define IR_SAMPLE_VERSION "libirsample asic2121w 1.1.0 alpha"
 
@@ -24,6 +25,7 @@ typedef enum {
     NO_PRINT,
 }log_level_t;
 
-//#define USER_FUNCTION_CALLBACK
+//#define SERIALAPP
+#define USER_FUNCTION_CALLBACK
 //#define LOOP_TEST
 //#define UPDATE_FW

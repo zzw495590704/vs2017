@@ -125,17 +125,16 @@ void usr_test_func(void* frame, void* usr_param)
     {
         memcpy(stream_frame_info->raw_frame, frame, stream_frame_info->camera_param.frame_size);
     }
-
+	int64_t timeStamp = readTimeStamp();
+	//printf("test_func:%d\n", ((unsigned short*)frame)[10]);
+	printf("frame_idx:%d, time:%lld \n", frame_idx, timeStamp);
     if (stream_frame_info->raw_frame != NULL)
     {
         raw_data_cut((uint8_t*)stream_frame_info->raw_frame, stream_frame_info->image_byte_size, \
             stream_frame_info->temp_byte_size, (uint8_t*)stream_frame_info->image_frame, \
             (uint8_t*)stream_frame_info->temp_frame);
-		display_save(stream_frame_info,frame_idx,true);
+		display_save(stream_frame_info,frame_idx, timeStamp,true);
     }
-
-    //printf("test_func:%d\n", ((unsigned short*)frame)[10]);
-    printf("frame_idx:%d\n", frame_idx);
     frame_idx++;
 }
 
@@ -185,11 +184,18 @@ int main(void)
 
         load_stream_frame_info(&stream_frame_info);
 
+//#ifdef SERIALAPP
+		std::thread serialThread(serialAppInit);
+//#endif
+
 //user function callback mode
 #ifdef USER_FUNCTION_CALLBACK
 #	    //off auto fix
-        display_init(&stream_frame_info);
-        rst = ir_camera_stream_on_with_callback(&stream_frame_info, usr_test_func);
+		command_sel(33);
+		command_sel(19);
+		display_init(&stream_frame_info);
+        
+		rst = ir_camera_stream_on_with_callback(&stream_frame_info, usr_test_func);
 
         //if (rst < 0)
         //{
@@ -233,6 +239,7 @@ int main(void)
         printf("test cycle=%d\n",i);
     }
 #endif
+	serialThread.join();
     puts("EXIT");
     getchar();
     return 0;

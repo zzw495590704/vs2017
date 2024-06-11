@@ -26,7 +26,7 @@ void display_release(void);
 void display_one_frame(StreamFrameInfo_t* stream_frame_info);
 
 //display_save
-void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, bool save_flag);
+void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, int64_t timeStamp, bool save_flag);
 
 //display thread
 void* display_function(void* threadarg);

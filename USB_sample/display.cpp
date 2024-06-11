@@ -352,7 +352,7 @@ void display_one_frame(StreamFrameInfo_t* stream_frame_info)
 }
 
 //display save
-void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, bool save_flag)
+void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, int64_t timeStamp, bool save_flag)
 {
 	if (stream_frame_info == NULL)
 	{
@@ -386,7 +386,8 @@ void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, bool save
 	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
 	if (save_flag)
 	{
-		std::string filename = "./data/frame_" + std::to_string(frame_idx) + ".png";
+		//D:/Project/Software/VS2017/github/USB_sample/data/frame_
+		std::string filename = "../data/frame_" + std::to_string(frame_idx) +"_" + std::to_string(timeStamp) + ".png";
 		cv::imwrite(filename, image);
 	}
 	cv::imshow("Image", image);
