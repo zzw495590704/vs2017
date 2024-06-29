@@ -302,10 +302,59 @@ void mirror_flip_demo(FrameInfo_t* frame_info, uint8_t* frame, MirrorFlipStatus_
 		break;
 	}
 }
+//
+////display the frame by opencv 
+//void display_one_frame(StreamFrameInfo_t* stream_frame_info)
+//{
+//	if (stream_frame_info == NULL)
+//	{
+//		return;
+//	}
+//
+//	char key_press = 0;
+//	int rst = 0;
+//	static struct timeval now_time,last_time;
+//	gettimeofday(&now_time, NULL);
+//	float frame = (double)((now_time.tv_sec - last_time.tv_sec)*1000000+\
+//					(now_time.tv_usec - last_time.tv_usec));
+//	memcpy(&last_time, &now_time, sizeof(now_time));
+//
+//	char frameText[10] = { " " };
+//	sprintf(frameText, "%.2f", 20);
+//	printf("%.2f\n", frame);
+//	int pix_num = stream_frame_info->image_info.width * stream_frame_info->image_info.height;
+//	int width = stream_frame_info->image_info.width;
+//	int height = stream_frame_info->image_info.height;
+//#ifndef OPENCV_ENABLE
+//	printf("raw data=%d\n", ((uint16_t*)stream_frame_info->image_frame)[1000]);
+//#endif
+//
+//	display_image_process(stream_frame_info->image_frame, pix_num, &stream_frame_info->image_info);
+//	if ((stream_frame_info->image_info.rotate_side == LEFT_90D)|| \
+//		(stream_frame_info->image_info.rotate_side == RIGHT_90D))
+//	{
+//		width = stream_frame_info->image_info.height;
+//		height = stream_frame_info->image_info.width;
+//	}
+//
+//	mirror_flip_demo(&stream_frame_info->image_info, image_tmp_frame2, \
+//					stream_frame_info->image_info.mirror_flip_status);
+//	rotate_demo(&stream_frame_info->image_info, image_tmp_frame2, \
+//				stream_frame_info->image_info.rotate_side);
+//
+//#ifdef OPENCV_ENABLE
+//	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
+//	putText(image, frameText, cv::Point(11, 11), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(0), 1, 8);
+//	putText(image, frameText, cv::Point(10, 10), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(255), 1, 8);
+//	cv::imshow("Test", image);
+//	cvWaitKey(5);
+//#endif
+//}
 
 //display the frame by opencv 
 void display_one_frame(StreamFrameInfo_t* stream_frame_info)
 {
+	static int64_t timeStamp_last;
 	if (stream_frame_info == NULL)
 	{
 		return;
@@ -313,55 +362,15 @@ void display_one_frame(StreamFrameInfo_t* stream_frame_info)
 
 	char key_press = 0;
 	int rst = 0;
-	static struct timeval now_time,last_time;
+	static struct timeval now_time, last_time;
 	gettimeofday(&now_time, NULL);
-	float frame = 1000000 / (double)((now_time.tv_sec - last_time.tv_sec)*1000000+\
-					(now_time.tv_usec - last_time.tv_usec));
+	float frame = (double)((now_time.tv_sec - last_time.tv_sec) * 1000000 + \
+		(now_time.tv_usec - last_time.tv_usec));
 	memcpy(&last_time, &now_time, sizeof(now_time));
 
 	char frameText[10] = { " " };
-	sprintf(frameText, "%.2f", frame);
-
-	int pix_num = stream_frame_info->image_info.width * stream_frame_info->image_info.height;
-	int width = stream_frame_info->image_info.width;
-	int height = stream_frame_info->image_info.height;
-#ifndef OPENCV_ENABLE
-	printf("raw data=%d\n", ((uint16_t*)stream_frame_info->image_frame)[1000]);
-#endif
-
-	display_image_process(stream_frame_info->image_frame, pix_num, &stream_frame_info->image_info);
-	if ((stream_frame_info->image_info.rotate_side == LEFT_90D)|| \
-		(stream_frame_info->image_info.rotate_side == RIGHT_90D))
-	{
-		width = stream_frame_info->image_info.height;
-		height = stream_frame_info->image_info.width;
-	}
-
-	mirror_flip_demo(&stream_frame_info->image_info, image_tmp_frame2, \
-					stream_frame_info->image_info.mirror_flip_status);
-	rotate_demo(&stream_frame_info->image_info, image_tmp_frame2, \
-				stream_frame_info->image_info.rotate_side);
-
-#ifdef OPENCV_ENABLE
-	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
-	putText(image, frameText, cv::Point(11, 11), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(0), 1, 8);
-	putText(image, frameText, cv::Point(10, 10), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(255), 1, 8);
-	cv::imshow("Test", image);
-	cvWaitKey(5);
-#endif
-}
-
-//display save
-void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, int64_t timeStamp, bool save_flag)
-{
-	if (stream_frame_info == NULL)
-	{
-		return;
-	}
-
-	char key_press = 0;
-	int rst = 0;
-
+	sprintf(frameText, "%.2f", 20);
+	//printf("%.2f\n", frame);
 	int pix_num = stream_frame_info->image_info.width * stream_frame_info->image_info.height;
 	int width = stream_frame_info->image_info.width;
 	int height = stream_frame_info->image_info.height;
@@ -384,12 +393,70 @@ void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, int64_t t
 
 #ifdef OPENCV_ENABLE
 	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
-	if (save_flag)
+	putText(image, frameText, cv::Point(11, 11), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(0), 1, 8);
+	putText(image, frameText, cv::Point(10, 10), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(255), 1, 8);
+	cv::imshow("Test", image);
+	//#ifdef SERIALAPP
+		/*std::vector<int64_t> timeStamp = readSerial();
+		std::cout << "time:" << frame << "  [0]:" << timeStamp[0] - timeStamp_last << "  [1]:" << timeStamp[1] << "  [2]:" << timeStamp[2] << std::endl;
+		timeStamp_last = timeStamp[0];*/
+		/*int64_t timeStamp = readTimeStamp();
+		std::cout << "time:" << frame << "  [0]:" << timeStamp - timeStamp_last << std::endl;
+		timeStamp_last = timeStamp;*/
+	//#endif
+	cvWaitKey(5);
+#endif
+}
+
+
+static int64_t lastTime;
+//display save
+void display_save(StreamFrameInfo_t* stream_frame_info, int frame_idx, int64_t timeStamp, bool save_flag)
+{
+	if (stream_frame_info == NULL)
 	{
+		return;
+	}
+
+	char key_press = 0;
+	int rst = 0;
+
+	static struct timeval now_time, last_time;
+	gettimeofday(&now_time, NULL);
+	float frame = (double)((now_time.tv_sec - last_time.tv_sec) * 1000000 + \
+		(now_time.tv_usec - last_time.tv_usec));
+	memcpy(&last_time, &now_time, sizeof(now_time));
+	
+	printf("%d %.2f  %lld  %.f\n", frame_idx, frame, timeStamp - lastTime, timeStamp - lastTime - frame);
+	lastTime = timeStamp;
+	int pix_num = stream_frame_info->image_info.width * stream_frame_info->image_info.height;
+	int width = stream_frame_info->image_info.width;
+	int height = stream_frame_info->image_info.height;
+#ifndef OPENCV_ENABLE
+	printf("raw data=%d\n", ((uint16_t*)stream_frame_info->image_frame)[1000]);
+#endif
+
+	display_image_process(stream_frame_info->image_frame, pix_num, &stream_frame_info->image_info);
+	if ((stream_frame_info->image_info.rotate_side == LEFT_90D) || \
+		(stream_frame_info->image_info.rotate_side == RIGHT_90D))
+	{
+		width = stream_frame_info->image_info.height;
+		height = stream_frame_info->image_info.width;
+	}
+
+	mirror_flip_demo(&stream_frame_info->image_info, image_tmp_frame2, \
+		stream_frame_info->image_info.mirror_flip_status);
+	rotate_demo(&stream_frame_info->image_info, image_tmp_frame2, \
+		stream_frame_info->image_info.rotate_side);
+
+#ifdef OPENCV_ENABLE
+	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
+	//if (save_flag)
+	
 		//D:/Project/Software/VS2017/github/USB_sample/data/frame_
 		std::string filename = "../data/frame_" + std::to_string(frame_idx) +"_" + std::to_string(timeStamp) + ".png";
 		cv::imwrite(filename, image);
-	}
+	
 	cv::imshow("Image", image);
 	cvWaitKey(5);
 #endif

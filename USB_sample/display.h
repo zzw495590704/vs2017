@@ -7,6 +7,7 @@
 #include "libirprocess.h"
 #include "cmd.h"
 #include "temperature.h"
+#include "serial.h"
 
 #define OPENCV_ENABLE
 #ifdef OPENCV_ENABLE

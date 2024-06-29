@@ -17,7 +17,7 @@
 #endif
 //thread's semaphore
 #if defined(_WIN32)
-    extern HANDLE image_sem, temp_sem, image_done_sem, temp_done_sem;
+    extern HANDLE image_sem, temp_sem, image_done_sem, temp_done_sem, sample_sem, sample_done_sem;
 #elif defined(linux) || defined(unix)
     extern sem_t image_sem, temp_sem, image_done_sem, temp_done_sem;
 #endif

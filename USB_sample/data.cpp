@@ -1,7 +1,7 @@
 #include "data.h"
 
 #if defined(_WIN32)
-	HANDLE image_sem, temp_sem, image_done_sem, temp_done_sem;
+	HANDLE image_sem, temp_sem, image_done_sem, temp_done_sem, sample_sem, sample_done_sem;
 #elif defined(linux) || defined(unix)
 	sem_t image_sem, temp_sem, image_done_sem, temp_done_sem;
 #endif
@@ -12,8 +12,10 @@ int init_pthread_sem()
 #if defined(_WIN32)
 	image_sem = CreateSemaphore(NULL, 1, 1, NULL);
 	temp_sem = CreateSemaphore(NULL, 1, 1, NULL);
+	sample_sem = CreateSemaphore(NULL, 1, 1, NULL);
 	image_done_sem = CreateSemaphore(NULL, 0, 1, NULL);
 	temp_done_sem = CreateSemaphore(NULL, 0, 1, NULL);
+	sample_done_sem = CreateSemaphore(NULL, 0, 1, NULL);
 #elif defined(linux) || defined(unix)
 	sem_init(&image_sem, 0, 1);
 	sem_init(&temp_sem, 0, 1);
@@ -31,6 +33,8 @@ int destroy_pthread_sem()
 	CloseHandle(temp_sem);
 	CloseHandle(image_done_sem);
 	CloseHandle(temp_done_sem);
+	CloseHandle(sample_sem);
+	CloseHandle(sample_done_sem);
 #elif defined(linux) || defined(unix)
 	sem_destroy(&image_sem);
 	sem_destroy(&temp_sem);

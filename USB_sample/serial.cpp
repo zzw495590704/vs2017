@@ -1,17 +1,13 @@
-#include <windows.h>
-#include <iostream>
-#include <thread>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <mutex>
-#include <fstream>
+#include "serial.h"
+#include <chrono>
 HANDLE hSerial;
 bool keepReading = true;
 std::vector<int64_t> data;
+int64_t serial_time;
 std::vector<std::vector<int64_t>> csvData;
 int64_t timeStamp;
 std::mutex dataMutex;
+
 void InitSerialPort(const wchar_t* portName) {
 	hSerial = CreateFileW(portName, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
@@ -38,105 +34,75 @@ void InitSerialPort(const wchar_t* portName) {
 
 	COMMTIMEOUTS timeouts = { 0 };
 	timeouts.ReadIntervalTimeout = 50;
-	timeouts.ReadTotalTimeoutConstant = 50;
+	timeouts.ReadTotalTimeoutConstant = 1000;
 	timeouts.ReadTotalTimeoutMultiplier = 10;
 	timeouts.WriteTotalTimeoutConstant = 50;
 	timeouts.WriteTotalTimeoutMultiplier = 10;
 	if (!SetCommTimeouts(hSerial, &timeouts)) {
 		std::cerr << "Error setting timeouts.\n";
 	}
-}
-void WriteCsvDataToFile(const std::string& filename) {
-	std::ofstream outFile(filename); // 创建输出文件流
 
-	if (!outFile) {
-		std::cerr << "Error opening file for writing: " << filename << std::endl;
-		return;
-	}
-
-	for (const auto& row : csvData) { // 遍历每一行数据
-		for (size_t i = 0; i < row.size(); ++i) {
-			outFile << row[i]; // 写入数据
-			if (i < row.size() - 1) {
-				outFile << ","; // 添加逗号分隔符
-			}
-		}
-		outFile << "\n"; // 写入行结束符
-	}
-
-	outFile.close(); // 关闭文件
-}
-
-int64_t readTimeStamp() {
-	std::lock_guard<std::mutex> lock(dataMutex);  // 使用互斥锁保护对 firstData 的访问
-	if (data[0] == NULL)
-		timeStamp = 0;
-	else
-		timeStamp = data[0];
-	return timeStamp;  // 返回 firstData 的副本
-}
-
-void SerialReadThread() {
-	char szBuff[100];
-	DWORD dwBytesRead = 0;
-	std::string lineBuffer;
-
-	while (keepReading) {
-		if (ReadFile(hSerial, szBuff, sizeof(szBuff) - 1, &dwBytesRead, NULL)) {
-			szBuff[dwBytesRead] = '\0';  // 添加字符串结束符
-
-			for (DWORD i = 0; i < dwBytesRead; ++i) {
-				if (szBuff[i] == '\n') {  // 遇到换行符
-					lineBuffer += szBuff[i];
-					//std::cout << "Received: " << lineBuffer << std::endl;  // 输出一行数据
-					// 处理接收到的行数据
-
-					std::vector<int64_t> tempData;
-					std::stringstream ss(lineBuffer);
-					std::string item;
-					while (std::getline(ss, item, ',')) {
-						tempData.push_back(std::stoi(item));
-					}
-					//std::cout << "Received: " << data[0] << std::endl;
-					{
-						std::lock_guard<std::mutex> lock(dataMutex);
-						data = tempData;  // 更新全局 data 数组
-					}
-					csvData.push_back(tempData);
-					std::cout << "data[0]" << data[0] << " data[1]" << data[1] << " data[2]" << data[2] << std::endl;
-					lineBuffer.clear();  // 清空缓冲区
-				}
-
-				else {
-					lineBuffer += szBuff[i];  // 累积到缓冲区
-				}
-			}
-		}
-		else {
-			std::cerr << "Error reading from serial port.\n";
-		}
+	// 设置串口缓冲区大小
+	if (!SetupComm(hSerial, 1024, 1024)) {  // 1024字节接收和发送缓冲区
+		std::cerr << "Error setting up serial buffer size.\n";
 	}
 }
+
+void sendHexData(HANDLE hSerial, const char* data, size_t size) {
+	DWORD bytesWritten;
+	if (!WriteFile(hSerial, data, size, &bytesWritten, NULL)) {
+		std::cerr << "Error writing to serial port\n";
+	}
+}
+bool receiveInt64(HANDLE hSerial, int64_t& receivedData) {
+	DWORD bytesRead;
+	char buffer[8]; // 64位整数的大小为8字节
+	BOOL result = ReadFile(hSerial, buffer, sizeof(buffer), &bytesRead, NULL);
+
+	if (!result) {
+		std::cerr << "Error reading from serial port\n";
+		return false;
+	}
+	if (bytesRead != sizeof(buffer)) {
+		std::cerr << "Incomplete data received\n";
+		return false;
+	}
+
+	// 将接收到的字节数组直接转换为 int64_t
+	memcpy(&receivedData, buffer, sizeof(receivedData));
+	return true;
+}
+
+int64_t readMcuTime() {
+	// 发送两个十六进制数
+	char data[] = { 0xA3, 0x0D };
+	sendHexData(hSerial, data, sizeof(data));
+	int64_t receivedData;
+	if (receiveInt64(hSerial, receivedData)) {
+		//std::cout << "Received int64_t data: " << receivedData << "\n";
+		return receivedData;
+	}
+	return -1;
+}
+
 void serialAppInit() {
 	const wchar_t* portName = L"COM3";  // 替换为实际的串口名称
 	InitSerialPort(portName);
-
-	std::thread readThread(SerialReadThread);
-	readThread.detach(); // 将线程设置为后台运行
-
-	std::cout << "serialAppInit" << std::endl;
 }
 
-int serialAppClose() {
-	keepReading = false;
-	std::cout << "serialAppClose" << std::endl;
-	CloseHandle(hSerial); 
-	WriteCsvDataToFile("output.csv");
-	return 0;
-}
 
-void main() {
-	serialAppInit();
-	std::cin.get();
-	serialAppClose();
+void main_() {
+	const wchar_t* portName = L"COM3";  // 替换为实际的串口名称
+	InitSerialPort(portName);
+	// 发送两个十六进制数
+	char data[] = { 0xA3, 0x0D };
+	while (true) {
+		sendHexData(hSerial, data, sizeof(data));
+		int64_t receivedData;
+		if (receiveInt64(hSerial, receivedData)) {
+			std::cout << "Received int64_t data: " << receivedData << "\n";
+		}
+		
+		Sleep(40); // 间隔1000毫秒
+	}
 }

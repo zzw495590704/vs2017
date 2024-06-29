@@ -115,7 +115,7 @@ void usr_test_func(void* frame, void* usr_param)
 
     StreamFrameInfo_t* stream_frame_info;
     stream_frame_info = (StreamFrameInfo_t*)usr_param;
-
+	
     if (stream_frame_info == NULL)
     {
         return;
@@ -125,14 +125,15 @@ void usr_test_func(void* frame, void* usr_param)
     {
         memcpy(stream_frame_info->raw_frame, frame, stream_frame_info->camera_param.frame_size);
     }
-	int64_t timeStamp = readTimeStamp();
+
 	//printf("test_func:%d\n", ((unsigned short*)frame)[10]);
-	printf("frame_idx:%d, time:%lld \n", frame_idx, timeStamp);
+	int64_t timeStamp = readMcuTime();
     if (stream_frame_info->raw_frame != NULL)
     {
         raw_data_cut((uint8_t*)stream_frame_info->raw_frame, stream_frame_info->image_byte_size, \
             stream_frame_info->temp_byte_size, (uint8_t*)stream_frame_info->image_frame, \
             (uint8_t*)stream_frame_info->temp_frame);
+		//display_one_frame(stream_frame_info);
 		display_save(stream_frame_info,frame_idx, timeStamp,true);
     }
     frame_idx++;
@@ -184,9 +185,9 @@ int main(void)
 
         load_stream_frame_info(&stream_frame_info);
 
-//#ifdef SERIALAPP
-		std::thread serialThread(serialAppInit);
-//#endif
+#ifdef SERIALAPP
+		serialAppInit();
+#endif
 
 //user function callback mode
 #ifdef USER_FUNCTION_CALLBACK
@@ -222,16 +223,16 @@ int main(void)
 
         pthread_t tid_stream, tid_display, tid_temperature, tid_cmd;
 
-        pthread_create(&tid_temperature, NULL, temperature_function, &stream_frame_info);
+        //pthread_create(&tid_temperature, NULL, temperature_function, &stream_frame_info);
         pthread_create(&tid_display, NULL, display_function, &stream_frame_info);
         pthread_create(&tid_stream, NULL, stream_function, &stream_frame_info);
-        pthread_create(&tid_cmd, NULL, cmd_function, NULL);
+        //pthread_create(&tid_cmd, NULL, cmd_function, NULL);
 
 
         pthread_join(tid_stream, NULL);
         pthread_cancel(tid_display);
-        pthread_cancel(tid_temperature);
-        pthread_cancel(tid_cmd);
+        //pthread_cancel(tid_temperature);
+        //pthread_cancel(tid_cmd);
 #endif
 
         uvc_camera_close();
@@ -239,7 +240,7 @@ int main(void)
         printf("test cycle=%d\n",i);
     }
 #endif
-	serialThread.join();
+
     puts("EXIT");
     getchar();
     return 0;

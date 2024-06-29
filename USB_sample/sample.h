@@ -25,7 +25,7 @@ typedef enum {
     NO_PRINT,
 }log_level_t;
 
-//#define SERIALAPP
+#define SERIALAPP
 #define USER_FUNCTION_CALLBACK
 //#define LOOP_TEST
 //#define UPDATE_FW

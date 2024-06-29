@@ -334,7 +334,7 @@ void* stream_function(void* threadarg)
     {
 #if defined(_WIN32)
         WaitForSingleObject(image_done_sem, INFINITE);
-        WaitForSingleObject(temp_done_sem, INFINITE);
+        //WaitForSingleObject(temp_done_sem, INFINITE);
 #elif defined(linux) || defined(unix)
         sem_wait(&image_done_sem);
         sem_wait(&temp_done_sem);
@@ -352,7 +352,7 @@ void* stream_function(void* threadarg)
         {
 #if defined(_WIN32)
             ReleaseSemaphore(image_sem, 1, NULL);
-            ReleaseSemaphore(temp_sem, 1, NULL);
+            //ReleaseSemaphore(temp_sem, 1, NULL);
 #elif defined(linux) || defined(unix)
             sem_post(&image_sem);
             sem_post(&temp_sem);
@@ -375,7 +375,7 @@ void* stream_function(void* threadarg)
         }
 #if defined(_WIN32)
         ReleaseSemaphore(image_sem, 1, NULL);
-        ReleaseSemaphore(temp_sem, 1, NULL);
+        //ReleaseSemaphore(temp_sem, 1, NULL);
 #elif defined(linux) || defined(unix)
         sem_post(&image_sem);
         sem_post(&temp_sem);
@@ -391,7 +391,7 @@ void* stream_function(void* threadarg)
 
 #if defined(_WIN32)
     WaitForSingleObject(image_done_sem, INFINITE);
-    WaitForSingleObject(temp_done_sem, INFINITE);
+    //WaitForSingleObject(temp_done_sem, INFINITE);
 #elif defined(linux) || defined(unix)
     sem_wait(&image_done_sem);
     sem_wait(&temp_done_sem);
