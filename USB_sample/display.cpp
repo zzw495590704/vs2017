@@ -395,6 +395,10 @@ void display_one_frame(StreamFrameInfo_t* stream_frame_info)
 	cv::Mat image = cv::Mat(height, width, CV_8UC3, image_tmp_frame2);
 	putText(image, frameText, cv::Point(11, 11), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(0), 1, 8);
 	putText(image, frameText, cv::Point(10, 10), cv::FONT_HERSHEY_PLAIN, 1, cv::Scalar::all(255), 1, 8);
+
+	uchar pixel = image.at<uchar>(141, 87);
+	//printf("Pixel value at (%d, %d): %d\n", 141, 87,255 - pixel);
+	//printf("Pixe: %d \n", 255 - pixel);
 	cv::imshow("Test", image);
 	//#ifdef SERIALAPP
 		/*std::vector<int64_t> timeStamp = readSerial();
@@ -403,6 +407,7 @@ void display_one_frame(StreamFrameInfo_t* stream_frame_info)
 		/*int64_t timeStamp = readTimeStamp();
 		std::cout << "time:" << frame << "  [0]:" << timeStamp - timeStamp_last << std::endl;
 		timeStamp_last = timeStamp;*/
+	
 	//#endif
 	cvWaitKey(5);
 #endif

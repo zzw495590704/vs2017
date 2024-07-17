@@ -80,17 +80,7 @@ void StartMeasureSR7() {
 		for (int i = lastBatchPoint_CurNo; i < BatchPoint_CurNo; ++i) {
 			double temp_max_x = 0;
 			double temp_min_x = 99999;
-			// 循环遍历每一列
-			int j_start,j_end;
-			if (s_scanNum) {
-				j_start = 500;
-				j_end = 1600;
-			}
-			else {
-				j_start = 0;
-				j_end = 1000;
-				
-			}
+			
 				
 			for (int j = 200; j < 1400; ++j) {
 				// 访问 HeightData[i * m_DataWidth + j] 来获取数据
@@ -98,13 +88,7 @@ void StartMeasureSR7() {
 				if (data != -1000000000) {
 					pcl::PointXYZ point;
 					point.y = (double)j* m_DataXPitch + s_x_offset;
-					if (point.y > temp_max_x)
-						temp_max_x = point.x;
-					if (point.y < temp_min_x)
-						temp_min_x = point.y;
-					/*if(s_scanNum%2)
-						point.y = (double)(BatchPoint-i)* m_DataYPitch;
-					else*/
+					
 					point.x = (double)i* m_DataYPitch;
 					point.z = (double)data / 100000;
 					save->points.push_back(point);

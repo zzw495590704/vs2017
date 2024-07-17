@@ -171,11 +171,12 @@ void print_cali_info(TempCalInfo_t* temp_cal_info)
 //detect the point's temperature
 void point_temp_demo(uint16_t* temp_data, TempDataRes_t temp_res)
 {
-	Dot_t point = { 128,96 };
+	Dot_t point = { 141,87 };
 	uint16_t temp = 0;
 	if (get_point_temp(temp_data, temp_res, point, &temp) == IRTEMP_SUCCESS)
 	{
-		printf("point(%d,%d)temp:%f\n", point.x, point.y, temp_value_converter(temp));
+		//printf("point(%d,%d)temp:%f\n", point.x, point.y, temp_value_converter(temp));
+		printf("temp:%f\r\n",temp_value_converter(temp));
 	}
 }
 
@@ -234,11 +235,11 @@ void* temperature_function(void* threadarg)
 #elif defined(linux) || defined(unix)
 		sem_wait(&temp_sem);
 #endif
-		if (timer % 25 == 0)	//colect one frame at an interval of 25 frames 
+		//if (timer % 25 == 0)	//colect one frame at an interval of 25 frames 
 		{
 			if (stream_frame_info->temp_byte_size > 0)
 			{
-				//point_temp_demo((uint16_t*)stream_frame_info->temp_frame, temp_res);
+				point_temp_demo((uint16_t*)stream_frame_info->temp_frame, temp_res);
 				//line_temp_demo((uint16_t*)stream_frame_info->temp_frame, temp_res);
 				//rect_temp_demo((uint16_t*)stream_frame_info->temp_frame, temp_res);
 			}

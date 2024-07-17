@@ -223,10 +223,10 @@ int main(void)
 
         pthread_t tid_stream, tid_display, tid_temperature, tid_cmd;
 
-        //pthread_create(&tid_temperature, NULL, temperature_function, &stream_frame_info);
+        pthread_create(&tid_temperature, NULL, temperature_function, &stream_frame_info);
         pthread_create(&tid_display, NULL, display_function, &stream_frame_info);
         pthread_create(&tid_stream, NULL, stream_function, &stream_frame_info);
-        //pthread_create(&tid_cmd, NULL, cmd_function, NULL);
+        pthread_create(&tid_cmd, NULL, cmd_function, NULL);
 
 
         pthread_join(tid_stream, NULL);

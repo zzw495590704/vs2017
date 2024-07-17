@@ -86,13 +86,13 @@ int64_t readMcuTime() {
 }
 
 void serialAppInit() {
-	const wchar_t* portName = L"COM3";  // 替换为实际的串口名称
+	const wchar_t* portName = L"\\\\.\\COM14";  // 替换为实际的串口名称
 	InitSerialPort(portName);
 }
 
 
 void main_() {
-	const wchar_t* portName = L"COM3";  // 替换为实际的串口名称
+	const wchar_t* portName = L"\\\\.\\COM14";  // 替换为实际的串口名称
 	InitSerialPort(portName);
 	// 发送两个十六进制数
 	char data[] = { 0xA3, 0x0D };
